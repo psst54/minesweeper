@@ -200,8 +200,6 @@ function revealNeighboringCells({ board, row, col, rowSize, colSize }) {
 
 const onClickCell = ({
   setIsRunning,
-  cursorMode,
-  setFlag,
   board,
   setBoardWrapper,
   row,
@@ -254,7 +252,6 @@ function App() {
     return board;
   };
 
-  const [cursorMode, setCursorMode] = react.useState("default");
   const [board, setBoard] = react.useState(
     initBoard({ row: rowSize, col: colSize, totalMineNum })
   );
@@ -315,8 +312,6 @@ function App() {
                   onClick={() => {
                     onClickCell({
                       setIsRunning,
-                      cursorMode,
-                      setFlag,
                       board,
                       setBoardWrapper,
                       row: rowIdx,
