@@ -198,21 +198,30 @@ function revealNeighboringCells({ board, row, col, rowSize, colSize }) {
   }
 }
 
-const onClickCell = ({ board, setBoard, row, col, rowSize, colSize }) => {
+const onClickCell = ({
+  setIsRunning,
+  cursorMode,
+  setFlag,
+  board,
+  setBoardWrapper,
+  row,
+  col,
+  rowSize,
+  colSize,
+}) => {
   const cell = board[row][col];
   if (cell.isRevealed || cell.isFlag) return;
   let newBoard = [...board];
 
   if (cell.isMine) {
+    setIsRunning(false);
     alert("GAME OVER!!");
 
-    for (let r = 0; r < rowSize; r++) {
-      for (let c = 0; c < colSize; c++) {
+    for (let r = 0; r < rowSize; r++)
+      for (let c = 0; c < colSize; c++)
         if (newBoard[r][c].isMine) newBoard[r][c].isRevealed = true;
-      }
-    }
 
-    setBoard(newBoard);
+    setBoardWrapper({ newBoard });
     return;
   }
 
@@ -222,20 +231,20 @@ const onClickCell = ({ board, setBoard, row, col, rowSize, colSize }) => {
     revealNeighboringCells({ board, row, col, rowSize, colSize });
   }
 
-  setBoard(newBoard);
+  setBoardWrapper({ newBoard });
 };
 
-const onClickCellRight = ({ board, setBoard, row, col }) => {
+const setFlag = ({ board, setBoardWrapper, row, col }) => {
   let newBoard = [...board];
 
   newBoard[row][col].isFlag = !newBoard[row][col].isFlag;
-  setBoard(newBoard);
+  setBoardWrapper({ newBoard });
 };
 
 function App() {
-  const row = 10;
-  const col = 10;
-  const totalMineNum = 20;
+  const rowSize = 3;
+  const colSize = 3;
+  const totalMineNum = 2;
 
   const initBoard = ({ row, col, totalMineNum }) => {
     let board = makeBoard({ rowSize: row, colSize: col });
@@ -245,20 +254,44 @@ function App() {
     return board;
   };
 
+  const [cursorMode, setCursorMode] = react.useState("default");
   const [board, setBoard] = react.useState(
-    initBoard({ row, col, totalMineNum })
+    initBoard({ row: rowSize, col: colSize, totalMineNum })
   );
   const [flagNum, setFlagNum] = react.useState(0);
   const [isRunning, setIsRunning] = react.useState(true);
 
+  const setBoardWrapper = ({ newBoard }) => {
+    if (!isRunning) return;
+
+    setBoard(newBoard);
+
+    let endFlag = true;
+    for (let r = 0; r < rowSize; r++)
+      for (let c = 0; c < colSize; c++)
+        if (board[r][c].isMine ^ newBoard[r][c].isFlag) {
+          endFlag = false;
+        }
+
+    if (endFlag) {
+      setIsRunning(false);
+
+      let endBoard = [...newBoard];
+      for (let r = 0; r < rowSize; r++)
+        for (let c = 0; c < colSize; c++)
+          if (!endBoard[r][c].isMine) {
+            endBoard[r][c].isRevealed = true;
+          }
+      setBoard(endBoard);
+    }
+  };
+
   react.useEffect(() => {
     let cnt = 0;
 
-    for (let r = 0; r < row; r++) {
-      for (let c = 0; c < col; c++) {
+    for (let r = 0; r < rowSize; r++)
+      for (let c = 0; c < colSize; c++)
         if (!board[r][c].isRevealed && board[r][c].isFlag) cnt++;
-      }
-    }
 
     setFlagNum(cnt);
   }, [board]);
@@ -275,20 +308,24 @@ function App() {
               return (
                 <Cell
                   key={colIdx}
+                  disabled={!isRunning}
                   onClick={() => {
                     onClickCell({
+                      setIsRunning,
+                      cursorMode,
+                      setFlag,
                       board,
-                      setBoard,
+                      setBoardWrapper,
                       row: rowIdx,
                       col: colIdx,
-                      rowSize: 10,
-                      colSize: 10,
+                      rowSize,
+                      colSize,
                     });
                   }}
                   onContextMenu={() => {
-                    onClickCellRight({
+                    setFlag({
                       board,
-                      setBoard,
+                      setBoardWrapper,
                       row: rowIdx,
                       col: colIdx,
                     });
