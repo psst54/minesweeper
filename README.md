@@ -6,8 +6,13 @@
 
 ## 🔗 Links
 
-- [블로그 주소 (up to date)](https://minesweeper-psst.pages.dev)
+- [배포 링크 (up to date)](https://minesweeper-psst.pages.dev)
 - [Github 코드 (always public)](https://github.com/psst54/minesweeper)
+
+## 📝 How to play
+
+- Left click to verify square if it contains mine
+- Right click square containing mine
 
 ## 🛠️ Tech Stack
 
