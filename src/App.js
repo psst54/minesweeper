@@ -86,9 +86,9 @@ const Cell = styled.button`
   width: 2.5rem;
   height: 2.5rem;
   border: ${({ isRevealed }) =>
-    isRevealed ? "4px outset #0004" : "4px outset #2224"};
+    isRevealed ? "4px outset #0003" : "4px outset #2225"};
 
-  background: ${({ isRevealed }) => (isRevealed ? "#1113" : "#bbb2")};
+  background: ${({ isRevealed }) => (isRevealed ? "#1114" : "#bbb2")};
 
   display: flex;
   align-items: center;
@@ -97,7 +97,7 @@ const Cell = styled.button`
   transition: transform 0.1s ease-in-out;
 
   &:hover {
-    background: ${({ isRevealed }) => (isRevealed ? "#1113" : "#5552")};
+    background: ${({ isRevealed }) => (isRevealed ? "#1114" : "#5552")};
 
     animation: ${({ isRevealed }) => (isRevealed ? "none" : animation)};
   }
@@ -242,9 +242,9 @@ const setFlag = ({ board, setBoardWrapper, row, col }) => {
 };
 
 function App() {
-  const rowSize = 3;
-  const colSize = 3;
-  const totalMineNum = 2;
+  const rowSize = 8;
+  const colSize = 10;
+  const totalMineNum = 10;
 
   const initBoard = ({ row, col, totalMineNum }) => {
     let board = makeBoard({ rowSize: row, colSize: col });
@@ -262,6 +262,7 @@ function App() {
   const [isRunning, setIsRunning] = react.useState(true);
 
   const setBoardWrapper = ({ newBoard }) => {
+    console.log(isRunning);
     if (!isRunning) return;
 
     setBoard(newBoard);
@@ -298,7 +299,9 @@ function App() {
 
   return (
     <Container>
-      <div style={{ color: "white", marginBottom: "1rem" }}>{flagNum}</div>
+      <div style={{ color: "white", marginBottom: "1rem" }}>
+        {totalMineNum - flagNum}
+      </div>
       <Board>
         {board.map((row, rowIdx) => (
           <Row key={rowIdx}>
