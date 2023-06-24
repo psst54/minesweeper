@@ -14,3 +14,22 @@ body,
   -moz-user-select: none; /* Disable text selection on Mozilla browsers */
   -ms-user-select: none; /* Disable text selection on Microsoft browsers */
 }
+
+.background {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 100vw;
+  min-height: 100vh;
+
+  background: rgb(11, 9, 51);
+  background: linear-gradient(
+    344deg,
+    rgba(11, 9, 51, 1) 12%,
+    rgba(4, 27, 131, 1) 42%,
+    rgba(67, 2, 181, 1) 68%,
+    rgba(149, 7, 245, 1) 98%
+  );
+}
