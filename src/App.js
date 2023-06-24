@@ -23,6 +23,12 @@ const cellTemplate = {
   neighboringMines: 0,
 };
 
+function copy2DArray(array) {
+  return array.map((innerArray) => {
+    return innerArray.slice();
+  });
+}
+
 const trembleAnimation = keyframes`
   0% {
     transform: scale(1, 1) rotate(0);
@@ -121,20 +127,36 @@ const makeBoard = ({ rowSize, colSize }) => {
   return ret;
 };
 
-const placeMines = ({ board, totalMineNum, rowSize, colSize }) => {
+const placeMines = ({ board, totalMineNum, rowSize, colSize, row, col }) => {
   let placedMineCnt = 0;
+
+  let newBoard = copy2DArray(board);
+
+  const dr = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
+  const dc = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
 
   while (placedMineCnt < totalMineNum) {
     const r = Math.floor(Math.random() * rowSize);
     const c = Math.floor(Math.random() * colSize);
 
-    if (!board[r][c].isMine) {
-      board[r][c].isMine = true;
-      placedMineCnt++;
+    if (newBoard[r][c].isMine) continue;
+
+    if (row !== undefined) {
+      let placeMineFlag = true;
+      for (let i = 0; i < dr.length; i++) {
+        const nr = r + dr[i];
+        const nc = c + dc[i];
+
+        if (nr === row && nc === col) placeMineFlag = false;
+      }
+      if (!placeMineFlag) continue;
     }
+
+    newBoard[r][c].isMine = true;
+    placedMineCnt++;
   }
 
-  return board;
+  return newBoard;
 };
 
 const countNeighboringMines = ({ board, r, c, rowSize, colSize }) => {
@@ -199,6 +221,8 @@ function revealNeighboringCells({ board, row, col, rowSize, colSize }) {
 }
 
 const onClickCell = ({
+  isFirstClick,
+  remakeBoard,
   setIsRunning,
   board,
   setBoardWrapper,
@@ -207,9 +231,12 @@ const onClickCell = ({
   rowSize,
   colSize,
 }) => {
+  if (isFirstClick) board = remakeBoard({ row, col });
+
   const cell = board[row][col];
+
   if (cell.isRevealed || cell.isFlag) return;
-  let newBoard = [...board];
+  let newBoard = copy2DArray(board);
 
   if (cell.isMine) {
     setIsRunning(false);
@@ -219,24 +246,33 @@ const onClickCell = ({
       for (let c = 0; c < colSize; c++)
         if (newBoard[r][c].isMine) newBoard[r][c].isRevealed = true;
 
-    setBoardWrapper({ newBoard });
+    setBoardWrapper({ newBoard, row, col });
     return;
   }
 
   newBoard[row][col].isRevealed = true;
 
   if (cell.neighboringMines === 0) {
-    revealNeighboringCells({ board, row, col, rowSize, colSize });
+    revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
   }
 
-  setBoardWrapper({ newBoard });
+  setBoardWrapper({ newBoard, row, col });
 };
 
-const setFlag = ({ board, setBoardWrapper, row, col }) => {
-  let newBoard = [...board];
+const setFlag = ({
+  isFirstClick,
+  remakeBoard,
+  board,
+  setBoardWrapper,
+  row,
+  col,
+}) => {
+  if (isFirstClick) board = remakeBoard({ row, col });
+
+  let newBoard = copy2DArray(board);
 
   newBoard[row][col].isFlag = !newBoard[row][col].isFlag;
-  setBoardWrapper({ newBoard });
+  setBoardWrapper({ newBoard, row, col });
 };
 
 function App() {
@@ -244,22 +280,40 @@ function App() {
   const colSize = 10;
   const totalMineNum = 10;
 
-  const initBoard = ({ row, col, totalMineNum }) => {
-    let board = makeBoard({ rowSize: row, colSize: col });
-    board = placeMines({ board, totalMineNum, rowSize: row, colSize: col });
-    board = calculateNeighboringMines({ board, rowSize: row, colSize: col });
+  const initBoard = ({ rowSize, colSize, totalMineNum }) => {
+    let board = makeBoard({ rowSize, colSize });
+    board = placeMines({ board, totalMineNum, rowSize, colSize });
+    board = calculateNeighboringMines({ board, rowSize, colSize });
 
     return board;
   };
 
-  const [board, setBoard] = react.useState(
-    initBoard({ row: rowSize, col: colSize, totalMineNum })
-  );
+  const [board, setBoard] = react.useState([]);
   const [flagNum, setFlagNum] = react.useState(0);
+  const [isFirstClick, setIsFirstClick] = react.useState(true);
   const [isRunning, setIsRunning] = react.useState(true);
 
+  const remakeBoard = ({ row, col }) => {
+    setIsFirstClick(false);
+
+    const initialBoard = calculateNeighboringMines({
+      board: placeMines({
+        board: makeBoard({ rowSize, colSize }),
+        totalMineNum,
+        rowSize,
+        colSize,
+        row,
+        col,
+      }),
+      rowSize,
+      colSize,
+    });
+
+    setBoard(initialBoard);
+    return initialBoard;
+  };
+
   const setBoardWrapper = ({ newBoard }) => {
-    console.log(isRunning);
     if (!isRunning) return;
 
     setBoard(newBoard);
@@ -267,14 +321,12 @@ function App() {
     let endFlag = true;
     for (let r = 0; r < rowSize; r++)
       for (let c = 0; c < colSize; c++)
-        if (board[r][c].isMine ^ newBoard[r][c].isFlag) {
-          endFlag = false;
-        }
+        if (board[r][c].isMine ^ newBoard[r][c].isFlag) endFlag = false;
 
     if (endFlag) {
       setIsRunning(false);
 
-      let endBoard = [...newBoard];
+      let endBoard = copy2DArray(newBoard);
       for (let r = 0; r < rowSize; r++)
         for (let c = 0; c < colSize; c++)
           if (!endBoard[r][c].isMine) {
@@ -285,6 +337,12 @@ function App() {
   };
 
   react.useEffect(() => {
+    setBoard(initBoard({ rowSize, colSize, totalMineNum }));
+  }, []);
+
+  react.useEffect(() => {
+    if (board.length < rowSize) return;
+
     let cnt = 0;
 
     for (let r = 0; r < rowSize; r++)
@@ -299,10 +357,11 @@ function App() {
       <div style={{ color: "white", marginBottom: "1rem" }}>
         {totalMineNum - flagNum}
       </div>
+
       <Board>
-        {board.map((row, rowIdx) => (
+        {board?.map((row, rowIdx) => (
           <Row key={rowIdx}>
-            {row.map((col, colIdx) => {
+            {row?.map((col, colIdx) => {
               const showFlag = col.isFlag;
 
               return (
@@ -311,6 +370,8 @@ function App() {
                   disabled={!isRunning}
                   onClick={() => {
                     onClickCell({
+                      isFirstClick,
+                      remakeBoard,
                       setIsRunning,
                       board,
                       setBoardWrapper,
