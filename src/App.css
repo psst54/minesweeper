@@ -24,12 +24,12 @@ body,
   min-width: 100vw;
   min-height: 100vh;
 
-  background: rgb(11, 9, 51);
+  background: #0b0933;
   background: linear-gradient(
     344deg,
-    rgba(11, 9, 51, 1) 12%,
-    rgba(4, 27, 131, 1) 42%,
-    rgba(67, 2, 181, 1) 68%,
-    rgba(149, 7, 245, 1) 98%
+    #0b0933 12%,
+    #041b83 42%,
+    #4302b5 68%,
+    #9608f5 98%
   );
 }

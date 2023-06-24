@@ -10,6 +10,8 @@ import {
 
 import Header from "./header";
 import Board from "./board";
+import WinModal from "./winModal";
+import LoseModal from "./winModal";
 
 function App() {
   const rowSize = 8;
@@ -28,6 +30,8 @@ function App() {
   const [flagNum, onClickCellRightNum] = react.useState(0);
   const [isFirstClick, setIsFirstClick] = react.useState(true);
   const [isRunning, setIsRunning] = react.useState(true);
+  const [showWin, setShowWin] = react.useState(false);
+  const [showLose, setShowLose] = react.useState(false);
 
   const setBoardWrapper = ({ newBoard }) => {
     if (!isRunning) return;
@@ -47,6 +51,7 @@ function App() {
         for (let c = 0; c < colSize; c++)
           if (!endBoard[r][c].isMine) endBoard[r][c].isRevealed = true;
 
+      setShowWin(true);
       setBoard(endBoard);
     }
   };
@@ -101,6 +106,9 @@ function App() {
         isFirstClick={isFirstClick}
         remakeBoard={remakeBoard}
       />
+
+      <WinModal isOpen={showWin} setIsOpen={setShowWin} />
+      <LoseModal isOpen={showLose} setIsOpen={setShowLose} />
     </div>
   );
 }
