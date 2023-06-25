@@ -45,9 +45,6 @@ function App() {
         if (newBoard[r][c].isMine && newBoard[r][c].isRevealed) loseFlag = true;
       }
 
-    console.log("[debug] winFlag", winFlag);
-    console.log("[debug] loseFlag", loseFlag);
-
     if (winFlag) {
       setIsRunning(false);
 
