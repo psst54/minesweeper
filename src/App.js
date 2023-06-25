@@ -36,12 +36,19 @@ function App() {
 
     setBoard(newBoard);
 
-    let endFlag = true;
-    for (let r = 0; r < rowSize; r++)
-      for (let c = 0; c < colSize; c++)
-        if (newBoard[r][c].isMine ^ newBoard[r][c].isFlag) endFlag = false;
+    let winFlag = true;
+    let loseFlag = false;
 
-    if (endFlag) {
+    for (let r = 0; r < rowSize; r++)
+      for (let c = 0; c < colSize; c++) {
+        if (newBoard[r][c].isMine ^ newBoard[r][c].isFlag) winFlag = false;
+        if (newBoard[r][c].isMine && newBoard[r][c].isRevealed) loseFlag = true;
+      }
+
+    console.log("[debug] winFlag", winFlag);
+    console.log("[debug] loseFlag", loseFlag);
+
+    if (winFlag) {
       setIsRunning(false);
 
       let endBoard = copy2DArray(newBoard);
@@ -50,6 +57,16 @@ function App() {
           if (!endBoard[r][c].isMine) endBoard[r][c].isRevealed = true;
 
       setShowWin(true);
+      setBoard(endBoard);
+    } else if (loseFlag) {
+      setIsRunning(false);
+
+      let endBoard = copy2DArray(newBoard);
+      for (let r = 0; r < rowSize; r++)
+        for (let c = 0; c < colSize; c++)
+          if (!endBoard[r][c].isMine) endBoard[r][c].isRevealed = true;
+
+      setShowLose(true);
       setBoard(endBoard);
     }
   };
@@ -106,7 +123,11 @@ function App() {
       />
 
       <WinModal isOpen={showWin} setIsOpen={setShowWin} initGame={initGame} />
-      <LoseModal isOpen={showLose} setIsOpen={setShowLose} />
+      <LoseModal
+        isOpen={showLose}
+        setIsOpen={setShowLose}
+        initGame={initGame}
+      />
     </div>
   );
 }

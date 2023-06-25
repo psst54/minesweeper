@@ -17,7 +17,30 @@ const numberColor = [
   "#ffffff",
 ];
 
+const revealNeighboringCell = ({ board, row, col, rowSize, colSize }) => {
+  // console.log("[debug] reveal", row, col);
+
+  const cell = board[row][col];
+  cell.isRevealed = true;
+
+  if (cell.neighboringMines === 0) {
+    revealNeighboringCells({
+      board,
+      row,
+      col,
+      rowSize,
+      colSize,
+    });
+  }
+};
+
 const revealNeighboringCells = ({ board, row, col, rowSize, colSize }) => {
+  // console.log("[debug] reveal neighbor of", row, col);
+
+  const cell = board[row][col];
+  if (cell.isMine || cell.isFlag) return;
+  cell.isRevealed = true;
+
   for (let i = 0; i < drNeighbor.length; i++) {
     const nr = row + drNeighbor[i];
     const nc = col + dcNeighbor[i];
@@ -27,20 +50,10 @@ const revealNeighboringCells = ({ board, row, col, rowSize, colSize }) => {
     )
       continue;
 
-    const cell = board[nr][nc];
-    if (!cell.isRevealed) {
-      cell.isRevealed = true;
+    const nextCell = board[nr][nc];
+    if (nextCell.isRevealed || nextCell.isFlag) continue;
 
-      if (cell.neighboringMines === 0) {
-        revealNeighboringCells({
-          board,
-          row: nr,
-          col: nc,
-          rowSize,
-          colSize,
-        });
-      }
-    }
+    revealNeighboringCell({ board, row: nr, col: nc, rowSize, colSize });
   }
 };
 
@@ -55,31 +68,31 @@ const onClickCell = ({
   rowSize,
   colSize,
 }) => {
-  if (board[row][col].isRevealed || board[row][col].isFlag) return;
+  if (board[row][col].isFlag) return;
 
   if (isFirstClick) board = remakeBoard({ row, col });
+
   let newBoard = copy2DArray(board);
+
   const cell = newBoard[row][col];
 
   if (cell.isMine) {
-    setIsRunning(false);
-    alert("GAME OVER!!");
-
     for (let r = 0; r < rowSize; r++)
       for (let c = 0; c < colSize; c++)
         if (newBoard[r][c].isMine) newBoard[r][c].isRevealed = true;
 
     setBoardWrapper({ newBoard });
-    return;
-  }
-
-  newBoard[row][col].isRevealed = true;
-
-  if (cell.neighboringMines === 0) {
+  } else if (cell.isRevealed) {
     revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
-  }
 
-  setBoardWrapper({ newBoard });
+    setBoardWrapper({ newBoard });
+  } else {
+    if (cell.neighboringMines === 0) {
+      revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
+    }
+
+    setBoardWrapper({ newBoard });
+  }
 };
 
 const onClickCellRight = ({
@@ -91,6 +104,8 @@ const onClickCellRight = ({
   col,
 }) => {
   if (isFirstClick) board = remakeBoard({ row, col });
+
+  if (board[row][col].isRevealed) return;
 
   let newBoard = copy2DArray(board);
   newBoard[row][col].isFlag = !newBoard[row][col].isFlag;
@@ -112,7 +127,12 @@ const Board = ({
       {board?.map((row, rowIdx) => (
         <Row key={rowIdx}>
           {row?.map((col, colIdx) => {
+            const isRevealed = col.isRevealed;
+            const isMine = col.isMine;
+
             const showFlag = col.isFlag;
+            const showMine = isRevealed && isMine && !showFlag;
+            const showNumber = isRevealed && !showFlag && !showMine;
 
             return (
               <Cell
@@ -141,18 +161,12 @@ const Board = ({
                 }}
                 isRevealed={col.isRevealed}
               >
-                {col.isRevealed ? (
-                  col.isMine ? (
-                    <Bomb width="1.2rem" height="1.2rem" />
-                  ) : (
-                    <MineNumberInCell color={numberColor[col.neighboringMines]}>
-                      {col.neighboringMines}
-                    </MineNumberInCell>
-                  )
-                ) : showFlag ? (
-                  <Flag width="1.8rem" height="1.8rem" />
-                ) : (
-                  ""
+                {showFlag && <Flag width="1.8rem" height="1.8rem" />}
+                {showMine && <Bomb width="1.2rem" height="1.2rem" />}
+                {showNumber && (
+                  <MineNumberInCell color={numberColor[col.neighboringMines]}>
+                    {col.neighboringMines}
+                  </MineNumberInCell>
                 )}
               </Cell>
             );

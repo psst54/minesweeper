@@ -5,7 +5,7 @@ const WinModal = ({ isOpen, setIsOpen, initGame }) => {
 
   return (
     <Container>
-      Congratulations!
+      You lost!
       <NewGameButton
         onClick={() => {
           initGame();
