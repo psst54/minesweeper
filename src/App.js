@@ -14,23 +14,26 @@ import WinModal from "./winModal";
 import LoseModal from "./loseModal";
 
 function App() {
+  // [data] variables to init game
   const rowSize = 8;
   const colSize = 10;
   const totalMineNum = 10;
 
   const [board, setBoard] = react.useState([]);
-  const [flagNum, onClickCellRightNum] = react.useState(0);
+  const [flagNum, setFlagNum] = react.useState(0);
   const [isFirstClick, setIsFirstClick] = react.useState(true);
   const [isRunning, setIsRunning] = react.useState(true);
   const [showWin, setShowWin] = react.useState(false);
   const [showLose, setShowLose] = react.useState(false);
 
+  // init game board, flags
   const initGame = () => {
     setIsFirstClick(true);
     setIsRunning(true);
     setBoard(makeBoard({ rowSize, colSize }));
   };
 
+  // check if game is end before set board data
   const setBoardWrapper = ({ newBoard }) => {
     if (!isRunning) return;
 
@@ -68,6 +71,8 @@ function App() {
     }
   };
 
+  // remake board
+  // board[row][col] is not containing mine and has 0 mines in neighbor
   const remakeBoard = ({ row, col }) => {
     setIsFirstClick(false);
 
@@ -92,6 +97,7 @@ function App() {
     initGame();
   }, []);
 
+  // set flag count when board is changed
   react.useEffect(() => {
     if (board.length < rowSize) return;
 
@@ -101,7 +107,7 @@ function App() {
       for (let c = 0; c < colSize; c++)
         if (!board[r][c].isRevealed && board[r][c].isFlag) cnt++;
 
-    onClickCellRightNum(cnt);
+    setFlagNum(cnt);
   }, [board]);
 
   return (

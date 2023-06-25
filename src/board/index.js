@@ -67,8 +67,10 @@ const onClickCell = ({
   rowSize,
   colSize,
 }) => {
+  // cannot click cell with flag
   if (board[row][col].isFlag) return;
 
+  // remake board on first click
   if (isFirstClick) board = remakeBoard({ row, col });
 
   let newBoard = copy2DArray(board);
@@ -76,14 +78,20 @@ const onClickCell = ({
   const cell = newBoard[row][col];
 
   if (cell.isMine) {
+    // if cell is mine, toggle only the cell
     newBoard[row][col].isRevealed = true;
     setBoardWrapper({ newBoard });
   } else if (cell.isRevealed) {
+    // if cell is number, toggle neighbor of the cell
+    revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
+    setBoardWrapper({ newBoard });
+  } else if (cell.neighboringMines === 0) {
+    // if cell is not revealed and its neighboring mine is 0, toggle neighbor of the cell
     revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
     setBoardWrapper({ newBoard });
   } else {
-    if (cell.neighboringMines === 0)
-      revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
+    // if cell is not revealed, toggle only the cell
+    newBoard[row][col].isRevealed = true;
     setBoardWrapper({ newBoard });
   }
 };
@@ -96,6 +104,7 @@ const onClickCellRight = ({
   row,
   col,
 }) => {
+  // remake board on first click
   if (isFirstClick) board = remakeBoard({ row, col });
 
   if (board[row][col].isRevealed) return;
