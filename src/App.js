@@ -18,20 +18,18 @@ function App() {
   const colSize = 10;
   const totalMineNum = 10;
 
-  const initBoard = ({ rowSize, colSize, totalMineNum }) => {
-    let board = makeBoard({ rowSize, colSize });
-    board = placeMines({ board, totalMineNum, rowSize, colSize });
-    board = calculateNeighboringMines({ board, rowSize, colSize });
-
-    return board;
-  };
-
   const [board, setBoard] = react.useState([]);
   const [flagNum, onClickCellRightNum] = react.useState(0);
   const [isFirstClick, setIsFirstClick] = react.useState(true);
   const [isRunning, setIsRunning] = react.useState(true);
   const [showWin, setShowWin] = react.useState(false);
   const [showLose, setShowLose] = react.useState(false);
+
+  const initGame = () => {
+    setIsFirstClick(true);
+    setIsRunning(true);
+    setBoard(makeBoard({ rowSize, colSize }));
+  };
 
   const setBoardWrapper = ({ newBoard }) => {
     if (!isRunning) return;
@@ -41,7 +39,7 @@ function App() {
     let endFlag = true;
     for (let r = 0; r < rowSize; r++)
       for (let c = 0; c < colSize; c++)
-        if (board[r][c].isMine ^ newBoard[r][c].isFlag) endFlag = false;
+        if (newBoard[r][c].isMine ^ newBoard[r][c].isFlag) endFlag = false;
 
     if (endFlag) {
       setIsRunning(false);
@@ -77,7 +75,7 @@ function App() {
   };
 
   react.useEffect(() => {
-    setBoard(initBoard({ rowSize, colSize, totalMineNum }));
+    initGame();
   }, []);
 
   react.useEffect(() => {
@@ -107,7 +105,7 @@ function App() {
         remakeBoard={remakeBoard}
       />
 
-      <WinModal isOpen={showWin} setIsOpen={setShowWin} />
+      <WinModal isOpen={showWin} setIsOpen={setShowWin} initGame={initGame} />
       <LoseModal isOpen={showLose} setIsOpen={setShowLose} />
     </div>
   );

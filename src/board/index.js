@@ -55,13 +55,11 @@ const onClickCell = ({
   rowSize,
   colSize,
 }) => {
+  if (board[row][col].isRevealed || board[row][col].isFlag) return;
+
   if (isFirstClick) board = remakeBoard({ row, col });
-
-  const cell = board[row][col];
-
-  if (cell.isRevealed || cell.isFlag) return;
-
   let newBoard = copy2DArray(board);
+  const cell = newBoard[row][col];
 
   if (cell.isMine) {
     setIsRunning(false);
