@@ -60,7 +60,6 @@ const revealNeighboringCells = ({ board, row, col, rowSize, colSize }) => {
 const onClickCell = ({
   isFirstClick,
   remakeBoard,
-  setIsRunning,
   board,
   setBoardWrapper,
   row,
@@ -77,20 +76,14 @@ const onClickCell = ({
   const cell = newBoard[row][col];
 
   if (cell.isMine) {
-    for (let r = 0; r < rowSize; r++)
-      for (let c = 0; c < colSize; c++)
-        if (newBoard[r][c].isMine) newBoard[r][c].isRevealed = true;
-
+    newBoard[row][col].isRevealed = true;
     setBoardWrapper({ newBoard });
   } else if (cell.isRevealed) {
     revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
-
     setBoardWrapper({ newBoard });
   } else {
-    if (cell.neighboringMines === 0) {
+    if (cell.neighboringMines === 0)
       revealNeighboringCells({ board: newBoard, row, col, rowSize, colSize });
-    }
-
     setBoardWrapper({ newBoard });
   }
 };
@@ -118,7 +111,6 @@ const Board = ({
   board,
   setBoardWrapper,
   isRunning,
-  setIsRunning,
   isFirstClick,
   remakeBoard,
 }) => {
@@ -142,7 +134,6 @@ const Board = ({
                   onClickCell({
                     isFirstClick,
                     remakeBoard,
-                    setIsRunning,
                     board,
                     setBoardWrapper,
                     row: rowIdx,

@@ -1,11 +1,11 @@
-import { Container, NewGameButton } from "./styles";
+import { Container, NewGameButton } from "../styles/modal";
 
 const WinModal = ({ isOpen, setIsOpen, initGame }) => {
   if (!isOpen) return <></>;
 
   return (
     <Container>
-      You lost!
+      Congratulations!
       <NewGameButton
         onClick={() => {
           initGame();

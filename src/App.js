@@ -11,7 +11,7 @@ import {
 import Header from "./header";
 import Board from "./board";
 import WinModal from "./winModal";
-import LoseModal from "./winModal";
+import LoseModal from "./loseModal";
 
 function App() {
   const rowSize = 8;
@@ -64,7 +64,7 @@ function App() {
       let endBoard = copy2DArray(newBoard);
       for (let r = 0; r < rowSize; r++)
         for (let c = 0; c < colSize; c++)
-          if (!endBoard[r][c].isMine) endBoard[r][c].isRevealed = true;
+          if (endBoard[r][c].isMine) endBoard[r][c].isRevealed = true;
 
       setShowLose(true);
       setBoard(endBoard);
@@ -117,7 +117,6 @@ function App() {
         board={board}
         setBoardWrapper={setBoardWrapper}
         isRunning={isRunning}
-        setIsRunning={setIsRunning}
         isFirstClick={isFirstClick}
         remakeBoard={remakeBoard}
       />
